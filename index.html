@@ -1071,12 +1071,22 @@
             }
 
             handleBreedingAndGrowth() {
-                const adultSheepInPasture = this.entities.filter(e => e instanceof Sheep && e.isAdult && !e.breedingCooldown && this.isInsidePasture(e));
-                let breedingPairs = Math.floor(adultSheepInPasture.length / 2);
+                // MODIFIED: Sheep can now breed anywhere, not just in the pasture.
+                const breedableAdults = this.entities.filter(e => e instanceof Sheep && e.isAdult && !e.breedingCooldown);
+                let breedingPairs = Math.floor(breedableAdults.length / 2);
                 for(let i = 0; i < breedingPairs; i++) {
-                    this.entities.push(new Sheep(this, this.world.pasture.x + this.world.pasture.width/2, this.world.pasture.y + this.world.pasture.height/2, false));
-                    adultSheepInPasture[i*2].breedingCooldown = 5;
-                    adultSheepInPasture[i*2+1].breedingCooldown = 5;
+                    const parent1 = breedableAdults[i*2];
+                    const parent2 = breedableAdults[i*2+1];
+
+                    // Spawn new lamb between the two parents
+                    const spawnX = (parent1.x + parent2.x) / 2;
+                    const spawnY = (parent1.y + parent2.y) / 2;
+
+                    this.entities.push(new Sheep(this, spawnX, spawnY, false));
+                    
+                    parent1.breedingCooldown = 5;
+                    parent2.breedingCooldown = 5;
+                    this.logMessage("새로운 새끼 양이 태어났습니다!");
                 }
             }
 
